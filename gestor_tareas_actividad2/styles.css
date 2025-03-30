@@ -1,0 +1,142 @@
+body {
+    background-image: url('images/trabajo_oficina.jpg'); /* Ruta de la imagen */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    font-family: 'Urbanist', sans-serif;
+    color: rgb(51, 51, 51); /* Color gris oscuro */
+    padding: 20px;
+}
+
+.fondo-seccion {
+    background-color: rgba(240, 248, 255, 0.75); /* Fondo celeste */
+    width: 100%; /* El fondo ocupa todo el ancho */
+    padding: 20px 0; /* Padding superior e inferior para dar espacio */
+    box-sizing: border-box;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+    z-index: -1;
+}
+
+.titulo-principal {
+    font-size: 100px;
+    font-weight: 700;
+    color: rgb(0, 123, 255); /* Azul */
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.titulo-secundario {
+    font-size: 30px;
+    font-weight: 600;
+    color: rgb(0, 123, 255); /* Azul */
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: rgb(0, 0, 0); /* Fondo oscuro */
+    border-radius: 5px;
+    width: 500px; /* Hace que el título tenga el mismo ancho que las tareas */
+    box-sizing: border-box; /* Incluye el padding en el cálculo del ancho */
+    text-align: center;
+    
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 500px; /* Alinea el formulario con el ancho de la lista */
+    max-width: 100%;
+    padding-top: 40px;
+
+}
+
+form .input-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+form input[type="text"] {
+    width: 85%;
+    padding: 10px;
+    height: 40px;
+    margin-bottom: 10px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form button {
+    width: 13%;
+    padding: 10px;
+    height: 40px;
+    background-color: rgb(0, 123, 255);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+form button:hover {
+    background-color: rgb(0, 86, 179);
+}
+
+#lista-tareas {
+    width: 100%; /* Ajusta el ancho para que sea flexible */
+    max-width: 500px; /* Limita el ancho máximo a 500px */
+    margin: 0 auto; /* Centra las tareas dentro del contenedor */
+    padding: 0;
+    list-style-type: none;
+    
+}
+
+.tarea {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    width: 500px; /* Ancho de las tareas, igual que el título */
+    box-sizing: border-box; /* Incluye el padding en el cálculo del ancho */
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 5px;
+    font-weight: 400;
+    color: rgb(68, 68, 68);
+    background-color: rgb(240, 240, 240);
+    font-size: 30px; /* Mismo tamaño que el del título secundario */
+    text-align: center;
+}
+
+.checkbox {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.recycle-bin {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.completada {
+    text-decoration: line-through;
+}
