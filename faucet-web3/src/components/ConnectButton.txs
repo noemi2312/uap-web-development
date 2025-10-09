@@ -1,0 +1,21 @@
+import { useAccount, useDisconnect } from 'wagmi'
+import { Web3Button } from '@web3modal/wagmi/react'
+
+export default function ConnectButton() {
+  const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
+
+  if (isConnected)
+    return (
+      <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+        <p><b>Conectado:</b> {address}</p>
+        <button onClick={() => disconnect()}>Desconectar</button>
+      </div>
+    )
+
+  return (
+    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+      <Web3Button />
+    </div>
+  )
+}
