@@ -1,8 +1,7 @@
-// src/config/wagmi.ts
 import { defaultWagmiConfig } from '@web3modal/wagmi/react'
 import { sepolia } from 'viem/chains'
 
-// 🔐 Project ID de Web3Modal (obtenelo en https://cloud.walletconnect.com)
+// 🔐 Project ID de Web3Modal 
 export const projectId = '3dea841a0f284fac6b8dedf3bb35d88f'
 
 // Configuración principal
