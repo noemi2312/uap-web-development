@@ -1,8 +1,10 @@
 import { useAccount, useDisconnect } from 'wagmi'
+import { useWeb3Modal } from '@web3modal/wagmi/react'
 
 export default function App() {
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
+  const { open } = useWeb3Modal()
 
   return (
     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
@@ -15,8 +17,7 @@ export default function App() {
           <button onClick={() => disconnect()}>Desconectar</button>
         </>
       ) : (
-        // ✅ Este botón lo provee Web3Modal automáticamente
-        <w3m-button />
+        <button onClick={() => open()}>Conectar Wallet</button>
       )}
     </div>
   )

@@ -7,7 +7,7 @@ import App from './App.tsx'
 import './index.css'
 
 // 👉 Importá la config del modal
-import { config } from './config/web3.ts'
+import { config } from './config/web3'
 
 // 👉 Crea el cliente para React Query
 const queryClient = new QueryClient()
