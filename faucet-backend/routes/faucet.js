@@ -1,12 +1,12 @@
+// routes/faucet.js
 import express from 'express'
 import { ethers } from 'ethers'
-import dotenv from 'dotenv'
 import { verifyToken } from '../middleware/auth.js'
-
+import dotenv from 'dotenv'
 dotenv.config()
+
 const router = express.Router()
 
-// 🔹 Conexión a blockchain
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL)
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider)
 
@@ -33,23 +33,19 @@ const faucetAbi = [
     outputs: [{ type: 'uint256' }]
   },
   {
-    name: 'getFaucetUsers',
+    name: 'getFaucetAmount',
     type: 'function',
     stateMutability: 'view',
     inputs: [],
-    outputs: [{ type: 'address[]' }]
+    outputs: [{ type: 'uint256' }]
   }
 ]
 
 const contract = new ethers.Contract(process.env.FAUCET_ADDRESS, faucetAbi, wallet)
 
-// 🔹 Reclamar tokens (protegido)
+// 🔹 Reclamar tokens
 router.post('/claim', verifyToken, async (req, res) => {
   const address = req.user.address
-
-  if (!ethers.isAddress(address)) {
-    return res.status(400).json({ error: 'Dirección inválida' })
-  }
 
   try {
     const tx = await contract.claim(address)
@@ -61,7 +57,7 @@ router.post('/claim', verifyToken, async (req, res) => {
   }
 })
 
-// 🔹 Consultar estado de usuario (protegido)
+// 🔹 Obtener estado del faucet
 router.get('/status/:address', verifyToken, async (req, res) => {
   const { address } = req.params
 
@@ -70,17 +66,20 @@ router.get('/status/:address', verifyToken, async (req, res) => {
   }
 
   try {
-    const hasClaimed = await contract.hasAddressClaimed(address)
-    const balance = await contract.balanceOf(address)
-    const users = await contract.getFaucetUsers()
+    const [hasClaimed, balance, faucetAmount] = await Promise.all([
+      contract.hasAddressClaimed(address),
+      contract.balanceOf(address),
+      contract.getFaucetAmount()
+    ])
+
     res.json({
       hasClaimed,
-      balance: balance.toString(),
-      users
+      balance: ethers.formatEther(balance),
+      faucetAmount: ethers.formatEther(faucetAmount)
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ error: 'Error obteniendo status' })
+    res.status(500).json({ error: 'Error obteniendo estado del faucet' })
   }
 })
 
