@@ -1,3 +1,4 @@
+// src/App.tsx
 import { useAccount, useDisconnect, useReadContract, useWriteContract } from 'wagmi'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { formatEther } from 'viem'
@@ -27,10 +28,10 @@ const faucetAbi = [
     outputs: [{ type: 'uint256' }]
   },
   {
-    name: 'claimTokens',
+    name: 'claim',
     type: 'function',
     stateMutability: 'nonpayable',
-    inputs: [],
+    inputs: [{ name: 'recipient', type: 'address' }],
     outputs: []
   }
 ]
@@ -41,14 +42,14 @@ export default function App() {
   const { open } = useWeb3Modal()
   const { writeContractAsync, isPending } = useWriteContract()
 
-  // 🔹 Leer cantidad que entrega el faucet
+  // Leer cantidad que entrega el faucet
   const { data: faucetAmount } = useReadContract({
     address: faucetAddress,
     abi: faucetAbi,
     functionName: 'getFaucetAmount',
   })
 
-  // 🔹 Ver si el usuario ya reclamó
+  // Ver si el usuario ya reclamó
   const { data: hasClaimed } = useReadContract({
     address: faucetAddress,
     abi: faucetAbi,
@@ -56,7 +57,7 @@ export default function App() {
     args: address ? [address] : undefined,
   })
 
-  // 🔹 Leer balance del usuario
+  // Leer balance del usuario
   const { data: balance, refetch } = useReadContract({
     address: faucetAddress,
     abi: faucetAbi,
@@ -64,13 +65,14 @@ export default function App() {
     args: address ? [address] : undefined,
   })
 
-  // 🔹 Función para reclamar tokens
+  // Reclamar tokens
   const handleClaim = async () => {
     try {
       await writeContractAsync({
         address: faucetAddress,
         abi: faucetAbi,
-        functionName: 'claimTokens',
+        functionName: 'claim',
+        args: [address],
       })
       await refetch()
       alert('✅ Tokens reclamados correctamente')
