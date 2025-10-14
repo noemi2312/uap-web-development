@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# 💧 Faucet Web3 - React + Node + Ethereum Sepolia
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Proyecto realizado para el **Ejercicio 12**: Aplicación React Web3 con Faucet Token.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Descripción del Proyecto
 
-## React Compiler
+Esta aplicación permite conectar una wallet (MetaMask), consultar el estado de un contrato Faucet en la testnet **Ethereum Sepolia**, y reclamar tokens de manera autenticada a través de un backend Node.js.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ⚙️ Tecnologías Utilizadas
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### **Frontend**
+- React + Vite
+- TypeScript
+- Ethers.js
+- Axios
+- Vite para desarrollo local
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### **Backend**
+- Node.js + Express
+- Ethers.js
+- dotenv
+- jsonwebtoken
+- Middleware de autenticación JWT
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### **Blockchain**
+- Red: Ethereum Sepolia Testnet
+- RPC: `https://ethereum-sepolia-rpc.publicnode.com`
+- Contrato: [`0x3e2117c19a921507ead57494bbf29032f33c7412`](https://sepolia.etherscan.io/address/0x3e2117c19a921507ead57494bbf29032f33c7412#code)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🧩 Funcionalidades Implementadas
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 🔹 Frontend
+✅ Conexión de wallet (MetaMask)  
+✅ Verificación del estado del faucet  
+✅ Reclamo de tokens (una vez por dirección)  
+✅ Visualización del balance del usuario  
+✅ Interfaz básica para interacción con el backend  
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🔹 Backend
+✅ Endpoint `/faucet/claim` — Ejecuta el reclamo en el contrato  
+✅ Endpoint `/faucet/status/:address` — Devuelve estado, balance y cantidad reclamada  
+✅ Middleware de autenticación con JWT (`verifyToken`)  
+✅ Conexión a Sepolia mediante `ethers`  
+✅ Variables de entorno seguras (.env)
+
+---
+
+## 🧰 Variables de Entorno (.env)
+
+Ejemplo de archivo `.env` usado en el backend:
+

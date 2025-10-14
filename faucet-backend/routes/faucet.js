@@ -83,4 +83,16 @@ router.get('/status/:address', verifyToken, async (req, res) => {
   }
 })
 
+// 🔹 Obtener lista de usuarios del faucet
+router.get('/users', verifyToken, async (req, res) => {
+  try {
+    const users = await contract.getFaucetUsers()
+    res.json({ users })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Error obteniendo lista de usuarios' })
+  }
+})
+
+
 export default router

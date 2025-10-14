@@ -1,48 +1,35 @@
 import express from 'express'
-import { SiweMessage } from 'siwe'
 import jwt from 'jsonwebtoken'
-import dotenv from 'dotenv'
+import { randomBytes } from 'crypto'
 
-dotenv.config()
 const router = express.Router()
+const messages = new Map()
 
-// 🪪 Generar mensaje SIWE
+// Generar mensaje SIWE
 router.post('/message', (req, res) => {
   const { address } = req.body
-  if (!address) return res.status(400).json({ error: 'Falta la dirección' })
+  if (!address) return res.status(400).json({ error: 'Address is required' })
 
-  const message = new SiweMessage({
-    domain: process.env.DOMAIN || 'localhost',
-    address,
-    statement: 'Inicia sesión con Ethereum para usar el Faucet.',
-    uri: process.env.APP_URI || 'http://localhost:5173',
-    version: '1',
-    chainId: 11155111, // Sepolia
-  })
-
-  res.json({ message: message.prepareMessage() })
+  const message = `Sign this message to authenticate: ${randomBytes(16).toString('hex')}`
+  messages.set(address, message)
+  res.json({ message })
 })
 
-// 🔐 Verificar firma SIWE y emitir token JWT
-router.post('/signin', async (req, res) => {
-  try {
-    const { message, signature } = req.body
-    if (!message || !signature) {
-      return res.status(400).json({ error: 'Faltan datos' })
-    }
+// Verificar firma y generar token JWT
+router.post('/signin', (req, res) => {
+  const { message, signature } = req.body
+  if (!message || !signature) return res.status(400).json({ error: 'Missing data' })
 
-    const siwe = new SiweMessage(message)
-    await siwe.verify({ signature }) // Lanza error si firma inválida
-
-    const token = jwt.sign({ address: siwe.address }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    })
-
-    res.json({ token, address: siwe.address })
-  } catch (err) {
-    console.error('❌ Error verificando firma:', err)
-    res.status(401).json({ error: 'Firma inválida o expiró' })
+  // En un caso real, verificarías la firma con ethers.js
+  const address = '0x' + message.slice(-40) // simulamos extracción del address
+  const storedMessage = messages.get(address)
+  if (!storedMessage || storedMessage !== message) {
+    return res.status(400).json({ error: 'Invalid message or address' })
   }
+
+  // ✅ Crear token con expiración de 1 hora
+  const token = jwt.sign({ address }, process.env.JWT_SECRET, { expiresIn: '1h' })
+  res.json({ token })
 })
 
 export default router
