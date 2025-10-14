@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 const router = express.Router()
 
-// 🪪 Generar mensaje SIWE (Sign-In with Ethereum)
+// 🪪 Generar mensaje SIWE
 router.post('/message', (req, res) => {
   const { address } = req.body
   if (!address) return res.status(400).json({ error: 'Falta la dirección' })
@@ -32,19 +32,16 @@ router.post('/signin', async (req, res) => {
     }
 
     const siwe = new SiweMessage(message)
-    const result = await siwe.verify({ signature })
-
-    if (!result.success)
-      return res.status(401).json({ error: 'Firma inválida' })
+    await siwe.verify({ signature }) // Lanza error si firma inválida
 
     const token = jwt.sign({ address: siwe.address }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     })
 
-    res.json({ token })
+    res.json({ token, address: siwe.address })
   } catch (err) {
     console.error('❌ Error verificando firma:', err)
-    res.status(500).json({ error: 'Error verificando firma' })
+    res.status(401).json({ error: 'Firma inválida o expiró' })
   }
 })
 
