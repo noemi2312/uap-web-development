@@ -1,46 +1,78 @@
 "use client";
-import React, { useState } from "react";
+
+import { useState } from "react";
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
-    []
-  );
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
-    if (!input.trim()) return; // Evita enviar mensajes vacíos
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: input }]);
-    setInput(""); // Limpia el input después de enviar
+    const newMessages: ChatMessage[] = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
+    setInput("");
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      const data = await res.json();
+
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((prev) => [...prev, { role: "assistant", content: "⚠️ Error al conectar con el servidor." }]);
+    }
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Chatbot</h1>
+    <main className="flex flex-col items-center justify-between min-h-screen p-6 bg-gray-100">
+      <div className="w-full max-w-2xl bg-white shadow-lg rounded-lg p-6 flex flex-col">
+        <h1 className="text-2xl font-bold mb-4 text-center">💬 Chatbot</h1>
 
-      <div className="flex-1 overflow-y-auto border p-2 rounded">
-        {messages.map((msg, index) => (
-          <div key={index} className="mb-2">
-            <strong>{msg.role === "user" ? "Tú" : "Bot"}:</strong> {msg.content}
-          </div>
-        ))}
-      </div>
+        {/* Zona de mensajes */}
+        <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`p-3 rounded-lg max-w-[80%] ${
+                msg.role === "user"
+                  ? "bg-blue-500 text-white self-end ml-auto"
+                  : "bg-gray-200 text-gray-800 self-start"
+              }`}
+            >
+              {msg.content}
+            </div>
+          ))}
+        </div>
 
-      <div className="mt-4 flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 border rounded p-2"
-          placeholder="Escribe un mensaje..."
-        />
-        <button
-          onClick={handleSend}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Enviar
-        </button>
+        {/* Input */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            className="flex-1 border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300"
+            placeholder="Escribe tu mensaje..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          />
+          <button
+            onClick={handleSend}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            Enviar
+          </button>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
