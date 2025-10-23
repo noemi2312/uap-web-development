@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -10,27 +10,61 @@ type ChatMessage = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll automático al agregar mensajes
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const newMessages: ChatMessage[] = [...messages, { role: "user", content: input }];
-    setMessages(newMessages);
+    const userMessage: ChatMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsTyping(true);
 
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
-      });
+      // =============================
+      // Simulación de streaming para presentación
+      // =============================
+      // Esto reemplaza temporalmente la llamada real a la API.
+      // Cuando tengas la API funcionando, reemplazá este bloque
+      // con fetch("/api/chat", { ... }) al backend.
+      const fakeResponse = "¡Hola! Esto es una respuesta simulada del asistente.";
+      let displayed = "";
+      for (const char of fakeResponse) {
+        displayed += char;
+        setMessages((prev) => [
+          ...prev.filter((m) => m.role !== "assistant" || m.content !== displayed.slice(0, -1)), // reemplaza el mensaje en construcción
+          { role: "assistant", content: displayed },
+        ]);
+        await new Promise((r) => setTimeout(r, 30)); // efecto tipo “streaming”
+      }
 
-      const data = await res.json();
+      // =============================
+      // Fin simulación
+      // =============================
 
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      // Si tuvieras la API real:
+      // const res = await fetch("/api/chat", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ message: input }),
+      // });
+      // const data = await res.json();
+      // setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
+
     } catch (error) {
       console.error("Error:", error);
-      setMessages((prev) => [...prev, { role: "assistant", content: "⚠️ Error al conectar con el servidor." }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "⚠️ Error al conectar con el servidor." },
+      ]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -53,6 +87,13 @@ export default function ChatPage() {
               {msg.content}
             </div>
           ))}
+          {/* Indicador de typing */}
+          {isTyping && (
+            <div className="p-3 rounded-lg max-w-[80%] bg-gray-200 text-gray-800 self-start">
+              🤖 escribiendo...
+            </div>
+          )}
+          <div ref={messagesEndRef}></div>
         </div>
 
         {/* Input */}

@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
 
@@ -12,28 +12,17 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: process.env.OPENROUTER_MODEL || "anthropic/claude-3-haiku",
-        messages,
+        messages, // enviamos todo el historial
       }),
     });
 
-    const data = await response.json();
+    const rawData = await response.json();
+    console.log("Respuesta cruda de OpenRouter:", rawData);
 
-    console.log("Respuesta cruda de OpenRouter:", data);
-
-    if (!response.ok) {
-      throw new Error(data.error?.message || "Error en OpenRouter");
-    }
-
-    // ✅ Extraemos sólo el mensaje de la IA
-    const reply = data.choices?.[0]?.message?.content ?? "No se pudo obtener una respuesta.";
-
-    return NextResponse.json({ reply });
-
-  } catch (error) {
-    console.error("Error en /api/chat:", error);
-    return NextResponse.json(
-      { reply: "⚠️ Error al procesar la solicitud" }, 
-      { status: 500 }
-    );
+    const content = rawData?.choices?.[0]?.message?.content || "No se pudo obtener una respuesta.";
+    return NextResponse.json({ content });
+  } catch (error: any) {
+    console.error("Error en backend:", error);
+    return NextResponse.json({ content: "Error procesando la solicitud." }, { status: 500 });
   }
 }
