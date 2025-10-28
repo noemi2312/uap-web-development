@@ -1,21 +1,29 @@
 'use client';
 import { useState } from 'react';
-import { fetchBooks } from '@/lib/api';
 import BookCard from '@/components/BookCard';
+
+interface Book {
+  id: string;
+  title: string;
+  authors?: string[];
+  thumbnail?: string;
+}
 
 export default function HomePage() {
   const [query, setQuery] = useState('');
-  const [books, setBooks] = useState<any[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
     setLoading(true);
     setError('');
     try {
-      const data = await fetchBooks(query);
+      const res = await fetch(`/api/books?q=${encodeURIComponent(query)}`);
+      const data: Book[] = await res.json();
       setBooks(data);
     } catch (err) {
       setError('Error al buscar libros');
@@ -27,6 +35,7 @@ export default function HomePage() {
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">📚 Buscador de Libros</h1>
+
       <form onSubmit={handleSearch} className="flex gap-2 mb-6">
         <input
           type="text"
@@ -48,7 +57,9 @@ export default function HomePage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {books.map((book) => (
-          <BookCard key={book.id} book={book} />
+          <a key={book.id} href={`/book/${book.id}`}>
+            <BookCard book={book} />
+          </a>
         ))}
       </div>
     </div>

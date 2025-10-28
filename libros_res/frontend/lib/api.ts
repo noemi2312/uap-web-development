@@ -1,4 +1,3 @@
-// frontend/lib/api.ts
 export interface Book {
   id: string;
   title: string;
@@ -10,24 +9,35 @@ export interface Book {
   publishedDate?: string;
 }
 
-// Función para buscar libros por query (título, autor, ISBN)
+// Buscar varios libros por query (título, autor o ISBN)
 export async function fetchBooks(query: string): Promise<Book[]> {
-  if (!query) return [];
-
   const res = await fetch(`http://localhost:4000/api/books?q=${encodeURIComponent(query)}`);
-  if (!res.ok) throw new Error('Error al obtener los libros');
-
-  const data: Book[] = await res.json();
-  return data;
+  const data = await res.json();
+  return data.map((b: any) => ({
+    id: b.id,
+    title: b.title,
+    authors: b.authors,
+    thumbnail: b.thumbnail,
+  }));
 }
 
-// Función para obtener un libro por ID
+// Buscar un libro por su id
 export async function fetchBookById(id: string): Promise<Book | null> {
-  if (!id) return null;
-
-  const res = await fetch(`http://localhost:4000/api/books/${id}`);
-  if (!res.ok) throw new Error('Error al obtener el libro');
-
-  const data: Book = await res.json();
-  return data;
+  try {
+    const res = await fetch(`http://localhost:4000/api/books/${id}`);
+    if (!res.ok) return null;
+    const b = await res.json();
+    return {
+      id: b.id,
+      title: b.title,
+      authors: b.authors,
+      thumbnail: b.thumbnail,
+      description: b.description,
+      categories: b.categories,
+      pageCount: b.pageCount,
+      publishedDate: b.publishedDate,
+    };
+  } catch {
+    return null;
+  }
 }

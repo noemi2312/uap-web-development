@@ -1,7 +1,41 @@
-import { fetchBookById } from '@/lib/api';
+interface BookDetail {
+  id: string;
+  title: string;
+  authors?: string[];
+  description?: string;
+  categories?: string[];
+  pageCount?: number;
+  publishedDate?: string;
+  thumbnail?: string;
+}
 
-export default async function BookDetail({ params }: { params: { id: string } }) {
-  const book = await fetchBookById(params.id);
+async function fetchBook(id: string): Promise<BookDetail | null> {
+  try {
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`);
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const volumeInfo = data.volumeInfo;
+
+    return {
+      id: data.id,
+      title: volumeInfo.title,
+      authors: volumeInfo.authors,
+      description: volumeInfo.description,
+      categories: volumeInfo.categories,
+      pageCount: volumeInfo.pageCount,
+      publishedDate: volumeInfo.publishedDate,
+      thumbnail: volumeInfo.imageLinks?.thumbnail,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export default async function BookPage({ params }: { params: { id: string } }) {
+  const book = await fetchBook(params.id);
+
+  if (!book) return <p className="p-8 text-red-500">Libro no encontrado</p>;
 
   return (
     <div className="p-8">
