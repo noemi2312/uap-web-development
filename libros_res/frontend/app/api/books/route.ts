@@ -1,26 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const q = searchParams.get('q');
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q");
 
-  if (!q) {
-    return NextResponse.json([], { status: 200 });
-  }
+  if (!query) return NextResponse.json({ error: "Falta el parámetro q" }, { status: 400 });
 
-  try {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}`);
-    const data = await res.json();
+  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`);
+  const data = await res.json();
 
-    const books = data.items?.map((item: any) => ({
-      id: item.id,
-      title: item.volumeInfo.title,
-      authors: item.volumeInfo.authors,
-      thumbnail: item.volumeInfo.imageLinks?.thumbnail,
-    })) || [];
+  const books = data.items?.map((item: any) => ({
+    id: item.id,
+    title: item.volumeInfo.title,
+    authors: item.volumeInfo.authors || [],
+    thumbnail: item.volumeInfo.imageLinks?.thumbnail || null,
+  })) || [];
 
-    return NextResponse.json(books);
-  } catch (err) {
-    return NextResponse.json({ error: 'Error fetching books' }, { status: 500 });
-  }
+  return NextResponse.json(books);
 }
