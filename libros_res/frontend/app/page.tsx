@@ -22,9 +22,22 @@ export default function HomePage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/books?q=${encodeURIComponent(query)}`);
-      const data: Book[] = await res.json();
-      setBooks(data);
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`
+      );
+      if (!res.ok) throw new Error('Error en la búsqueda');
+
+      const data = await res.json();
+      const items = data.items || [];
+
+      const formattedBooks: Book[] = items.map((item: any) => ({
+        id: item.id,
+        title: item.volumeInfo.title,
+        authors: item.volumeInfo.authors || [],
+        thumbnail: item.volumeInfo.imageLinks?.thumbnail || '',
+      }));
+
+      setBooks(formattedBooks);
     } catch (err) {
       setError('Error al buscar libros');
     } finally {
