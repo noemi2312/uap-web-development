@@ -8,12 +8,49 @@ interface Message {
   content: string;
 }
 
+// Clave para localStorage
+const CHAT_STORAGE_KEY = 'chatbot-messages';
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // 1. Cargar mensajes desde localStorage al iniciar
+  useEffect(() => {
+    try {
+      const savedMessages = localStorage.getItem(CHAT_STORAGE_KEY);
+      if (savedMessages) {
+        const parsedMessages = JSON.parse(savedMessages);
+        if (Array.isArray(parsedMessages)) {
+          setMessages(parsedMessages);
+          console.log('Mensajes cargados desde localStorage:', parsedMessages.length);
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando mensajes desde localStorage:', error);
+      // Si hay error, limpiar localStorage corrupto
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+    }
+  }, []);
+
+  // 2. Guardar mensajes en localStorage cuando cambien
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+        console.log('Mensajes guardados en localStorage:', messages.length);
+      } else {
+        // Si no hay mensajes, limpiar localStorage
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.error('Error guardando mensajes en localStorage:', error);
+    }
+  }, [messages]);
+
+  // 3. Auto-scroll cuando hay nuevos mensajes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -36,21 +73,20 @@ export default function ChatPage() {
       return 'El mensaje contiene caracteres no permitidos';
     }
     
-    return null; // Mensaje válido
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // Primero verificar loading, luego validar
-  if (isLoading) return;
+    e.preventDefault();
+    
+    if (isLoading) return;
 
-  // Validar el mensaje antes de enviar
-  const validationError = validateMessage(input);
-  if (validationError) {
-    alert(validationError);
-    return;
-  }
+    // Validar el mensaje antes de enviar
+    const validationError = validateMessage(input);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -120,7 +156,6 @@ export default function ChatPage() {
     } catch (error) {
       console.error('Chat error:', error);
       
-      // Determinar mensaje de error específico
       let errorMessage = 'Lo siento, ocurrió un error. Por favor intenta de nuevo.';
       
       if (error instanceof Error) {
@@ -152,31 +187,43 @@ export default function ChatPage() {
     setInput(e.target.value);
   };
 
-  // Función para limpiar la conversación
+  // Función para limpiar la conversación (y localStorage)
   const clearChat = () => {
     setMessages([]);
     setInput('');
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    console.log('Chat limpiado y localStorage eliminado');
   };
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Chatbot</h1>
-        {messages.length > 0 && (
-          <button
-            onClick={clearChat}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-            disabled={isLoading}
-          >
-            Limpiar Chat
-          </button>
-        )}
+        <div className="flex gap-2">
+          {/* Indicador de mensajes guardados */}
+          {messages.length > 0 && (
+            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {messages.length} mensajes guardados
+            </span>
+          )}
+          {messages.length > 0 && (
+            <button
+              onClick={clearChat}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
+              disabled={isLoading}
+            >
+              Limpiar Chat
+            </button>
+          )}
+        </div>
       </div>
       
       <div className="flex-1 overflow-y-auto mb-4 border rounded-lg p-4 bg-gray-50">
         {messages.length === 0 ? (
           <div className="text-gray-500 text-center py-8">
             Inicia una conversación...
+            <br />
+            <span className="text-sm">(Los mensajes se guardarán automáticamente)</span>
           </div>
         ) : (
           messages.map(message => (
@@ -221,7 +268,7 @@ export default function ChatPage() {
           placeholder="Escribe tu mensaje..."
           className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           disabled={isLoading}
-          maxLength={1000} // Límite HTML adicional
+          maxLength={1000}
         />
         <button 
           type="submit" 
