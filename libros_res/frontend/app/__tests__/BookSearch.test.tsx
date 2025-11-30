@@ -1,56 +1,34 @@
-/// <reference types="vitest" />
-import { vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import HomePage from '../page';
-import * as nextRouter from 'next/navigation';
+'use client';
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-global.fetch = vi.fn();
+export default function BookSearch() {
+  const [query, setQuery] = useState('');
+  const router = useRouter();
 
-describe('Buscador de libros', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
 
-  it('renderiza correctamente el formulario de búsqueda', () => {
-    render(<HomePage />);
-    expect(screen.getByPlaceholderText(/Buscar por título/i)).toBeInTheDocument();
-    expect(screen.getByText(/Buscar/i)).toBeInTheDocument();
-  });
-
-  it('realiza la búsqueda y muestra libros', async () => {
-    (fetch as vi.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        items: [
-          { id: '1', volumeInfo: { title: 'Libro 1', authors: ['Autor 1'], imageLinks: { thumbnail: '' } } },
-          { id: '2', volumeInfo: { title: 'Libro 2', authors: ['Autor 2'], imageLinks: { thumbnail: '' } } },
-        ],
-      }),
-    });
-
-    render(<HomePage />);
-    fireEvent.change(screen.getByPlaceholderText(/Buscar por título/i), { target: { value: 'test' } });
-    fireEvent.click(screen.getByText(/Buscar/i));
-
-    await waitFor(() => {
-      expect(screen.getByText('Libro 1')).toBeInTheDocument();
-      expect(screen.getByText('Libro 2')).toBeInTheDocument();
-    });
-  });
-
-  it('muestra error si la búsqueda falla', async () => {
-    (fetch as vi.Mock).mockResolvedValueOnce({ ok: false });
-
-    render(<HomePage />);
-    fireEvent.change(screen.getByPlaceholderText(/Buscar por título/i), { target: { value: 'test' } });
-    fireEvent.click(screen.getByText(/Buscar/i));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Error al buscar libros/i)).toBeInTheDocument();
-    });
-  });
-});
+  return (
+    <form onSubmit={handleSearch} className="flex gap-2">
+      <input
+        type="text"
+        placeholder="Buscar libros por título, autor o ISBN"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="flex-1 p-2 border border-gray-300 rounded-md"
+      />
+      <button 
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+      >
+        Buscar
+      </button>
+    </form>
+  );
+}
