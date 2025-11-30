@@ -1,6 +1,7 @@
 // app/lib/db.ts
 import { promises as fs } from 'fs'
 import path from 'path'
+import { TaskInput } from './validations'
 
 export interface Task {
   id: string
@@ -11,15 +12,6 @@ export interface Task {
   dueDate?: string
   createdAt: string
   updatedAt: string
-}
-
-// Tipo para crear tareas (sin los campos auto-generados)
-export type TaskInput = {
-  title: string
-  completed?: boolean
-  priority?: 'low' | 'medium' | 'high'
-  category?: 'work' | 'personal' | 'shopping' | 'health' | 'other'
-  dueDate?: string
 }
 
 const DB_PATH = path.join(process.cwd(), 'data', 'tasks.json')
@@ -75,6 +67,7 @@ const initialTasks: Task[] = [
   }
 ]
 
+// Función para asegurar que la base de datos existe
 async function ensureDB(): Promise<void> {
   try {
     await fs.access(DB_PATH)
@@ -103,12 +96,12 @@ export const db = {
   async createTask(taskData: TaskInput): Promise<Task> {
     const tasks = await this.getTasks()
     const newTask: Task = {
+      id: Date.now().toString(),
       title: taskData.title,
       completed: taskData.completed ?? false,
       priority: taskData.priority ?? 'medium',
       category: taskData.category ?? 'other',
       dueDate: taskData.dueDate,
-      id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
@@ -118,7 +111,7 @@ export const db = {
   },
 
   // Actualizar tarea existente
-  async updateTask(id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Promise<Task | null> {
+  async updateTask(id: string, updates: Partial<TaskInput>): Promise<Task | null> {
     const tasks = await this.getTasks()
     const taskIndex = tasks.findIndex(t => t.id === id)
     
@@ -146,12 +139,15 @@ export const db = {
     return true
   },
 
-  // Buscar tareas con filtros
+  // Buscar tareas con filtros - VERSIÓN ACTUALIZADA CON FECHAS
   async searchTasks(filters: {
     query?: string
     completed?: boolean
     priority?: Task['priority']
     category?: Task['category']
+    dueDateFrom?: string    // NUEVO: Fecha mínima
+    dueDateTo?: string      // NUEVO: Fecha máxima
+    overdue?: boolean       // NUEVO: Tareas atrasadas
   } = {}): Promise<Task[]> {
     const tasks = await this.getTasks()
     
@@ -174,6 +170,42 @@ export const db = {
       // Filtro por categoría
       if (filters.category && task.category !== filters.category) {
         return false
+      }
+      
+      // NUEVO: Filtro por fecha mínima
+      if (filters.dueDateFrom && task.dueDate) {
+        const taskDueDate = new Date(task.dueDate)
+        const filterFromDate = new Date(filters.dueDateFrom)
+        // Comparar solo la fecha (sin hora)
+        if (taskDueDate.toISOString().split('T')[0] < filterFromDate.toISOString().split('T')[0]) {
+          return false
+        }
+      }
+      
+      // NUEVO: Filtro por fecha máxima
+      if (filters.dueDateTo && task.dueDate) {
+        const taskDueDate = new Date(task.dueDate)
+        const filterToDate = new Date(filters.dueDateTo)
+        // Comparar solo la fecha (sin hora)
+        if (taskDueDate.toISOString().split('T')[0] > filterToDate.toISOString().split('T')[0]) {
+          return false
+        }
+      }
+      
+      // NUEVO: Filtro por tareas atrasadas
+      if (filters.overdue !== undefined) {
+        const now = new Date()
+        if (filters.overdue) {
+          // Solo tareas atrasadas: tienen dueDate, no están completadas y la fecha ya pasó
+          if (!task.dueDate || task.completed || new Date(task.dueDate) >= now) {
+            return false
+          }
+        } else {
+          // Excluir tareas atrasadas
+          if (task.dueDate && !task.completed && new Date(task.dueDate) < now) {
+            return false
+          }
+        }
       }
       
       return true

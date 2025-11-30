@@ -2,12 +2,12 @@
   {
     "id": "1",
     "title": "Comprar leche y pan",
-    "completed": false,
+    "completed": true,
     "priority": "medium",
     "category": "shopping",
     "dueDate": "2025-12-01T03:27:17.112Z",
     "createdAt": "2025-11-30T03:27:17.112Z",
-    "updatedAt": "2025-11-30T03:27:17.112Z"
+    "updatedAt": "2025-11-30T06:08:19.611Z"
   },
   {
     "id": "2",
@@ -45,5 +45,50 @@
     "category": "personal",
     "createdAt": "2025-11-30T03:27:17.112Z",
     "updatedAt": "2025-11-30T03:27:17.112Z"
+  },
+  {
+    "title": "estudiar JavaScript",
+    "completed": true,
+    "priority": "medium",
+    "category": "other",
+    "id": "1764480877490",
+    "createdAt": "2025-11-30T05:34:37.490Z",
+    "updatedAt": "2025-11-30T06:08:45.040Z"
+  },
+  {
+    "title": "estudiar JavaScript",
+    "completed": false,
+    "priority": "medium",
+    "category": "other",
+    "id": "1764481140267",
+    "createdAt": "2025-11-30T05:39:00.267Z",
+    "updatedAt": "2025-11-30T05:39:00.267Z"
+  },
+  {
+    "title": "los gorditos a gorditos a alimentar",
+    "completed": false,
+    "priority": "medium",
+    "category": "other",
+    "id": "1764481887918",
+    "createdAt": "2025-11-30T05:51:27.918Z",
+    "updatedAt": "2025-11-30T08:07:35.903Z"
+  },
+  {
+    "id": "1764488611329",
+    "title": "hacer ejercicio",
+    "completed": false,
+    "priority": "high",
+    "category": "health",
+    "createdAt": "2025-11-30T07:43:31.329Z",
+    "updatedAt": "2025-11-30T07:58:55.790Z"
+  },
+  {
+    "id": "1764488626824",
+    "title": "tarea de baja prioridad: leer libro",
+    "completed": true,
+    "priority": "medium",
+    "category": "other",
+    "createdAt": "2025-11-30T07:43:46.824Z",
+    "updatedAt": "2025-11-30T07:46:30.088Z"
   }
 ]
