@@ -1,0 +1,49 @@
+[
+  {
+    "id": "1",
+    "title": "Comprar leche y pan",
+    "completed": false,
+    "priority": "medium",
+    "category": "shopping",
+    "dueDate": "2025-12-01T03:27:17.112Z",
+    "createdAt": "2025-11-30T03:27:17.112Z",
+    "updatedAt": "2025-11-30T03:27:17.112Z"
+  },
+  {
+    "id": "2",
+    "title": "Terminar informe de ventas Q4",
+    "completed": false,
+    "priority": "high",
+    "category": "work",
+    "dueDate": "2025-11-30T05:27:17.112Z",
+    "createdAt": "2025-11-30T03:27:17.112Z",
+    "updatedAt": "2025-11-30T03:27:17.112Z"
+  },
+  {
+    "id": "3",
+    "title": "Ir al gimnasio",
+    "completed": true,
+    "priority": "medium",
+    "category": "health",
+    "createdAt": "2025-11-30T03:27:17.112Z",
+    "updatedAt": "2025-11-30T03:27:17.112Z"
+  },
+  {
+    "id": "4",
+    "title": "Llamar al dentista",
+    "completed": false,
+    "priority": "low",
+    "category": "health",
+    "createdAt": "2025-11-30T03:27:17.112Z",
+    "updatedAt": "2025-11-30T03:27:17.112Z"
+  },
+  {
+    "id": "5",
+    "title": "Planificar vacaciones",
+    "completed": false,
+    "priority": "low",
+    "category": "personal",
+    "createdAt": "2025-11-30T03:27:17.112Z",
+    "updatedAt": "2025-11-30T03:27:17.112Z"
+  }
+]
